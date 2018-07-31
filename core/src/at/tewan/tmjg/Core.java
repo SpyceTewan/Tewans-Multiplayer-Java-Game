@@ -1,37 +1,53 @@
 package at.tewan.tmjg;
 
+import java.io.IOException;
+
+import javax.swing.JOptionPane;
+
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.math.Vector3;
 
-import at.tewan.tmjg.net.NetworkCore;
+import at.tewan.tmjg.net.GameClient;
+import at.tewan.tmjg.net.GameServer;
+import at.tewan.tmjg.net.packets.Packet00Login;
+import at.tewan.tmjg.net.packets.Packet01Logout;
+import at.tewan.tmjg.server.DedicatedServer;
+import at.tewan.tmjg.util.StartParameters;
 
 public class Core extends ApplicationAdapter {
 	
 	private static final String TAG = "Core";
 	
-	private NetworkCore networkCore;
+	private GameServer gameServer;
+	private GameClient gameClient;
+	private DedicatedServer dedicatedServer;
 	
 	@SuppressWarnings("static-access")
 	@Override
 	public void create () {
 		Gdx.app.setLogLevel(Gdx.app.LOG_DEBUG);
+		initNetwork();
 		
-		
-		
-		networkCore = new NetworkCore("localhost");
-		
-		
+		Packet00Login loginPacket = new Packet00Login("Stefan");
+		try {
+			gameClient.sendPacket(loginPacket);
+		} catch (IOException e) {
+			System.out.println("Failed to login");
+		}
 	}
 
 	@Override
 	public void render () {
-		Environment.render();
+		
 	}
 	
 	@Override
 	public void dispose () {
+		try {
+			gameClient.sendPacket(new Packet01Logout("Exited Game"));
+		} catch (IOException e) {
+			System.out.println("Failed to send logout package");
+		}
 	}
 	
 	@Override
@@ -42,5 +58,18 @@ public class Core extends ApplicationAdapter {
 	@Override
 	public void resume() {
 		
+	}
+	
+	public void initNetwork() {
+		gameClient = new GameClient(JOptionPane.showInputDialog("Enter Server Adress"));
+		gameClient.start();
+		
+		if(StartParameters.START_ARGS.contains("-server")) {
+			gameServer = new GameServer();
+			dedicatedServer = new DedicatedServer();
+			gameServer.setPacketHandler(dedicatedServer);
+			
+			gameServer.start();
+		}
 	}
 }

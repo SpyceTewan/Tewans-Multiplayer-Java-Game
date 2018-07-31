@@ -21,5 +21,7 @@ public class Constants {
 	public static final String NET_HOST = "localhost";
 	public static final int NET_PORT = 9889;
 	
+	public static final int PORT = 3559;
+	
 	public static OrthographicCamera camera;
 }

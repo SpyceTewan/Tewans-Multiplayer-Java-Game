@@ -1,6 +1,6 @@
 package at.tewan.tmjg.net;
 
-import static at.tewan.tmjg.net.NetworkCore.PORT;
+import static at.tewan.tmjg.Constants.PORT;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -10,6 +10,8 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 
 import com.badlogic.gdx.Gdx;
+
+import at.tewan.tmjg.net.packets.Packet;
 
 public class GameClient extends Thread {
 	private static final String TAG = "Client";
@@ -50,5 +52,11 @@ public class GameClient extends Thread {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public void sendPacket(Packet packet) throws IOException {
+		DatagramPacket data = new DatagramPacket(packet.getPacket(), packet.getPacket().length, ipAdress, PORT);
+		
+		socket.send(data);
 	}
 }
